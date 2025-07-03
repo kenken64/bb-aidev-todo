@@ -19,15 +19,11 @@ RUN apk add --no-cache musl-dev sqlite-dev pkgconfig
 
 WORKDIR /backend
 
-# Copy Cargo files for dependency caching
+# Copy all source files
 COPY Cargo.toml Cargo.lock ./
-
-# Create dummy main to build dependencies
-RUN mkdir src && echo "fn main() {}" > src/main.rs
-RUN cargo build --release && rm src/main.rs
-
-# Copy actual source code and build
 COPY src/ ./src/
+
+# Build the application with release optimizations
 RUN cargo build --release
 
 # Stage 3: Runtime - Backend Only (serving frontend as static files)
