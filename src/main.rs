@@ -2,7 +2,7 @@ use axum::{
     extract::{Path, State},
     http::StatusCode,
     response::Json,
-    routing::{delete, get, post, put},
+    routing::{delete, get, get_service, post, put},
     Router,
 };
 use serde::{Deserialize, Serialize};
@@ -67,7 +67,12 @@ async fn main() {
         .route("/api/todos", post(create_todo))
         .route("/api/todos/:id", put(update_todo))
         .route("/api/todos/:id", delete(delete_todo))
-        .nest_service("/", ServeDir::new(&static_dir).append_index_html_on_directories(true))
+        .fallback(get_service(ServeDir::new(&static_dir)).handle_error(|error: std::io::Error| async move {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Unhandled internal error: {}", error),
+            )
+        }))
         .layer(
             ServiceBuilder::new()
                 .layer(CorsLayer::permissive())
@@ -78,12 +83,11 @@ async fn main() {
     let host = std::env::var("HOST").unwrap_or_else(|_| "0.0.0.0".to_string());
     let addr = format!("{}:{}", host, port);
     
-    let listener = tokio::net::TcpListener::bind(&addr)
+    println!("Server running on http://{}", addr);
+    axum::Server::bind(&addr.parse().unwrap())
+        .serve(app.into_make_service())
         .await
         .unwrap();
-    
-    println!("Server running on http://{}", addr);
-    axum::serve(listener, app).await.unwrap();
 }
 
 async fn get_todos(State(pool): State<AppState>) -> Result<Json<Vec<Todo>>, StatusCode> {
