@@ -42,7 +42,7 @@ WORKDIR /app
 COPY --from=backend-builder /backend/target/release/todo-backend ./
 
 # Copy frontend static files from builder stage
-COPY --from=frontend-builder /frontend/dist/frontend ./static/
+COPY --from=frontend-builder /frontend/dist/frontend/browser ./static/
 
 # Create data directory for SQLite with proper permissions
 RUN mkdir -p data && chown -R appuser:appgroup /app
