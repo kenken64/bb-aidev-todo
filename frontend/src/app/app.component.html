@@ -1,0 +1,78 @@
+<div class="container">
+  <h1>{{ title }}</h1>
+  
+  <div class="add-todo">
+    <input 
+      type="text" 
+      [(ngModel)]="newTodoTitle" 
+      placeholder="Add a new todo..." 
+      class="todo-input"
+      (keypress)="onKeyPress($event, 'add')"
+    >
+    <button (click)="addTodo()" class="add-btn">Add</button>
+  </div>
+
+  <div class="todo-list">
+    <div *ngFor="let todo of todos" class="todo-item" [class.completed]="todo.completed">
+      <div class="todo-content">
+        <input 
+          type="checkbox" 
+          [checked]="todo.completed" 
+          (change)="toggleComplete(todo)"
+          class="todo-checkbox"
+        >
+        
+        <span 
+          *ngIf="editingTodo?.id !== todo.id" 
+          class="todo-title"
+          (dblclick)="startEditing(todo)"
+        >
+          {{ todo.title }}
+        </span>
+        
+        <input 
+          *ngIf="editingTodo?.id === todo.id"
+          type="text"
+          [(ngModel)]="editTitle"
+          class="edit-input"
+          (keypress)="onKeyPress($event, 'edit')"
+          #editInput
+        >
+      </div>
+      
+      <div class="todo-actions">
+        <button 
+          *ngIf="editingTodo?.id !== todo.id"
+          (click)="startEditing(todo)" 
+          class="edit-btn"
+        >
+          Edit
+        </button>
+        <button 
+          *ngIf="editingTodo?.id === todo.id"
+          (click)="saveEdit()" 
+          class="save-btn"
+        >
+          Save
+        </button>
+        <button 
+          *ngIf="editingTodo?.id === todo.id"
+          (click)="cancelEditing()" 
+          class="cancel-btn"
+        >
+          Cancel
+        </button>
+        <button 
+          (click)="deleteTodo(todo)" 
+          class="delete-btn"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="todos.length === 0" class="empty-state">
+    No todos yet. Add one above!
+  </div>
+</div>

@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  todo-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - RUST_LOG=info
+      - DATABASE_URL=sqlite:/app/data/todos.db
+      - STATIC_DIR=/app/static
+      - HOST=0.0.0.0
+      - PORT=3000
+    volumes:
+      - todo_data:/app/data
+    restart: unless-stopped
+
+volumes:
+  todo_data:
